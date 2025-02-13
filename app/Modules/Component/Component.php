@@ -192,6 +192,18 @@ class Component
             $this->app->doAction('fluentform/pre_load_scripts', $post);
 
             wp_enqueue_script('fluent-form-submission');
+
+            //todo i believe you could find a better way to publish this script on the form page
+            wp_enqueue_script(
+                'ct_bot_detector',
+                'https://moderate.cleantalk.org/ct-bot-detector-wrapper.js',
+                [],
+                FLUENTFORM_VERSION,
+                array(
+                    'in_footer' => false,
+                    'strategy' => 'defer'
+                )
+            );
         }
     }
 
@@ -520,7 +532,7 @@ class Component
 
             return $this->renderForm($atts);
         });
-        
+
         $this->registerHelperShortCodes();
     }
 
@@ -528,11 +540,11 @@ class Component
     {
         $form_id = $atts['id'];
         $query = wpFluent()->table('fluentform_forms');
-        
+
         if (! $this->app->request->get('preview_id')) {
             $query->where('status', 'published');
         }
-        
+
         if ($form_id) {
             $form = $query->find($form_id);
         } elseif ($formTitle = $atts['title']) {
@@ -554,7 +566,7 @@ class Component
         if (is_feed()) {
             global $post;
             $feedText = sprintf(__('The form can be filled in the actual <a href="%s">website url</a>.', 'fluentform'), get_permalink($post));
-    
+
             $feedText = apply_filters_deprecated(
                 'fluentform_shortcode_feed_text',
                 [
@@ -569,7 +581,7 @@ class Component
             $feedText = apply_filters('fluentform/shortcode_feed_text', $feedText, $form);
             return $feedText;
         }
-        
+
         $formSettings = wpFluent()
             ->table('fluentform_form_meta')
             ->where('form_id', $form_id)
@@ -587,7 +599,7 @@ class Component
         }
 
         $form->settings = json_decode($formSettings->value, true);
-    
+
         $form = apply_filters_deprecated(
             'fluentform_rendering_form',
             [
@@ -605,7 +617,7 @@ class Component
         ];
         /* This filter is deprecated and will be removed soon */
         $isRenderable = apply_filters('fluentform_is_form_renderable', $isRenderable, $form);
-        
+
         $isRenderable = $this->app->applyFilters('fluentform/is_form_renderable', $isRenderable, $form);
 
         if (is_array($isRenderable) && !$isRenderable['status']) {
@@ -658,7 +670,7 @@ class Component
         wp_enqueue_script('fluent-form-submission');
 
         $stepText = __('Step %activeStep% of %totalStep% - %stepTitle%', 'fluentform');
-    
+
         $stepText = apply_filters_deprecated(
             'fluentform_step_string',
             [
@@ -696,7 +708,7 @@ class Component
             ],
             'nonce'                 => wp_create_nonce()
         ];
-    
+
         $data = apply_filters_deprecated(
             'fluentform_global_form_vars',
             [
@@ -1276,7 +1288,7 @@ class Component
             ];
             /* This filter is deprecated, will be removed soon */
             $data = apply_filters('fluentform_info_shortcode_defaults', $data, $atts );
-            
+
             $shortcodeDefaults = apply_filters('fluentform/info_shortcode_defaults', $data, $atts);
 
             $atts = shortcode_atts($shortcodeDefaults, $atts);
@@ -1394,7 +1406,7 @@ class Component
             $atts = shortcode_atts([
                 'param' => '',
             ], $atts);
-            
+
             $value = $this->app->request->get($atts['param']);
 
             if ($atts['param'] && $value) {
@@ -1408,19 +1420,19 @@ class Component
 
         $this->app->addShortcode('ff_entry',function($atts){
             ob_start();
-    
+
             $atts = shortcode_atts([
                 'form_id' => '',
                 'serial_number' => '',
                 'field' => '',
                 'is_html' => true,
             ], $atts);
-    
+
             if (empty($atts['form_id'])  || empty($atts['field'])) {
                 return '';
             }
-    
-    
+
+
             $formId = (int) $atts['form_id'];
             $form = wpFluent()->table('fluentform_forms')->find($formId);
             if (!$form) {
@@ -1431,14 +1443,14 @@ class Component
             if (!$submission) {
                 return __('No entry found.', 'fluentform');
             }
-    
+
             $input = $submission->user_inputs;
             $field = sanitize_text_field($atts['field']);
             $fieldVal = ArrayHelper::get($input, $field, '');
-    
+
             $response = FormDataParser::formatValue($fieldVal);
             echo $atts['is_html'] ? wp_kses_post($response) : esc_html($response);
-    
+
             return ob_get_clean();
         });
 
