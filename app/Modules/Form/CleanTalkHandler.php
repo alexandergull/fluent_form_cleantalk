@@ -107,9 +107,9 @@ class CleanTalkHandler
             'sender_email'    => '',
             'message'         => '',
             'phone'           => '',
-            'agent'           => 'wordpress',
+            'agent'           => 'wordpress-fluentform-' . FLUENTFORM_VERSION,
             'post_info'       => array(
-                'comment_type' => 'fluent_forms_vendor_integration__use_api'
+                'comment_type' => 'fluentform_vendor_integration'
             ),
             'all_headers'   => strtolower(json_encode(wpFluentForm()->request->header())),
         ];
