@@ -46,11 +46,11 @@ class Settings
     public function enqueue()
     {
         wp_enqueue_script('fluentform-global-settings-js');
-    
+
         wp_localize_script('fluentform-global-settings-js', 'FluentFormApp', [
             'plugin'              => $this->app->config->get('app.slug'),
             'akismet_activated'   => AkismetHandler::isPluginEnabled(),
-            'cleantalk_activated' => CleanTalkHandler::isPluginEnabled(),
+//            'cleantalk_activated' => CleanTalkHandler::isPluginEnabled(),
             'has_pro'             => defined('FLUENTFORMPRO'),
             'form_settings_str'   => TranslationString::getGlobalSettingsI18n()
         ]);
