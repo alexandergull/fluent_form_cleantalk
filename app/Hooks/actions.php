@@ -799,16 +799,26 @@ $app->addAction('fluentform/schedule_feed', function ($queueId) use ($app) {
 
 $app->addAction('init', function () use ($app) {
     new \FluentForm\App\Services\Integrations\MailChimp\MailChimpIntegration($app);
+    new \FluentForm\App\Modules\Form\TokenBasedSpamProtection($app);
 });
 
 $app->addAction('fluentform/form_element_start', function ($form) use ($app) {
     $honeyPot = new \FluentForm\App\Modules\Form\HoneyPot($app);
     $honeyPot->renderHoneyPot($form);
+
+    $tokenBasedSpamProtection = new \FluentForm\App\Modules\Form\TokenBasedSpamProtection($app);
+    $tokenBasedSpamProtection->renderTokenField($form);
+
+    $cleanTalk = new \FluentForm\App\Modules\Form\CleanTalkHandler();
+    $cleanTalk->setCleanTalkScript();
 });
 
 $app->addAction('fluentform/before_insert_submission', function ($insertData, $requestData, $form) use ($app) {
     $honeyPot = new \FluentForm\App\Modules\Form\HoneyPot($app);
     $honeyPot->verify($insertData, $requestData, $form->id);
+
+    $tokenBasedSpamProtection = new \FluentForm\App\Modules\Form\TokenBasedSpamProtection($app);
+    $tokenBasedSpamProtection->verify($insertData, $requestData, $form->id);
 }, 9, 3);
 
 // Maybe update current user allowed form ids,

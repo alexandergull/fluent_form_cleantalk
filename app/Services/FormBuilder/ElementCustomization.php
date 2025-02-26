@@ -685,8 +685,8 @@ $element_customization_settings = [
     ],
     'render_recaptcha_v3_badge' => [
         'template'  => 'radio',
-        'label'     => __('Render ReCaptcha v3 badge', 'fluentform'),
-        'help_text' => __('Select if Recaptcha v3 verified badge should render in the form or not', 'fluentform'),
+        'label'     => __('Render ReCaptcha V3 badge', 'fluentform'),
+        'help_text' => __('Select if ReCaptcha V3 verified badge should render in the form or not', 'fluentform'),
         'options'   => [
             [
                 'value' => true,

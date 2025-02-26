@@ -26,7 +26,7 @@ use FluentForm\Framework\Helpers\ArrayHelper;
 								<?php echo __('Confirmation Settings', 'fluentform'); ?>
 							</a>
 						</li>
-						<?php if(defined('FLUENTFORMPRO')): ?>
+						<?php if(defined('FLUENTFORMPRO') && $has_double_opt_in): ?>
 							<li>
 								<a class="ff-page-scroll"
 									href="#double-optin-confirmation">

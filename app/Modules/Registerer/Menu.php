@@ -704,10 +704,13 @@ class Menu
 
         $currentRoute = sanitize_key($this->app->request->get('sub_route', ''));
 
+        $hasDoubleOptinEnable = 'yes' === ArrayHelper::get(get_option('_fluentform_double_optin_settings'), 'enabled');
+
         $this->app->view->render('admin.form.settings_wrapper', [
             'form_id'           => $form_id,
             'settings_menus'    => $settingsMenus,
             'current_sub_route' => $currentRoute,
+            'has_double_opt_in' => $hasDoubleOptinEnable
         ]);
     }
 

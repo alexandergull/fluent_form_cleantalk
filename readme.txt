@@ -4,7 +4,7 @@ Tags: contact form, wp forms, forms, form builder, custom form
 Requires at least: 4.5
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 5.2.11
+Stable tag: 5.2.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -429,6 +429,12 @@ You can get support from our official support thread at <a href="https://wpmanag
 12. Asset Loading Comparison with Other Plugins
 
 == Changelog ==
+
+= 5.2.12 (Date: February 18, 2025) =
+- Adds token-based spam protection for enhanced form security
+- Adds Italian Language Translation
+- Improve Honeypot Security for better bot detection
+- Improve Turnstile appearance option names for clarity
 
 = 5.2.11 (Date: February 10, 2025) =
 - Adds CleanTalk Spam Protection with API

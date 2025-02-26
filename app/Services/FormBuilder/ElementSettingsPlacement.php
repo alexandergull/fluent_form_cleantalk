@@ -336,7 +336,6 @@ return [
             'label_placement',
             'name',
             'validation_rules',
-            'render_recaptcha_v3_badge'
         ],
     ],
     'hcaptcha' => [

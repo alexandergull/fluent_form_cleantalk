@@ -387,6 +387,22 @@ $app->addFilter(
     }
 );
 
+// render badge toggle in form editor in case of recaptcha v3
+$app->addFilter('fluentform/editor_element_settings_placement', function($placements, $form) {
+    $recaptchaDetails = get_option('_fluentform_reCaptcha_details');
+    if (!$recaptchaDetails) {
+        return $placements;
+    }
+
+    $isRecaptchaV3 = \FluentForm\Framework\Helpers\ArrayHelper::get($recaptchaDetails, 'api_version') === 'v3_invisible';
+    if (!$isRecaptchaV3) {
+        return $placements;
+    }
+
+    $placements['recaptcha']['general'][] = 'render_recaptcha_v3_badge';
+    return $placements;
+}, 10, 2);
+
 
 /*
  * Remove this after WP Fusion Update their plugin
