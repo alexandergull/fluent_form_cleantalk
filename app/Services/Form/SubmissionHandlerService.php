@@ -433,10 +433,16 @@ class SubmissionHandlerService
             $this->validationService->handleAkismetSpamError();
         }
 
-        if ($this->validationService->isCleanTalkSpam($this->formData, $this->form)) {
-            $hasSpam = true;
-            $this->validationService->handleCleanTalkSpamError();
-        }
+
+        /*
+         * Please, do not use CleanTalk libs and data to perform the check. This way calls a lot of dependencies
+         * that some of our solutions could be probably not complied to in the future releases.
+         * The best way is your own API call implementation.
+         */
+//        if ($this->validationService->isCleanTalkSpam($this->formData, $this->form)) {
+//            $hasSpam = true;
+//            $this->validationService->handleCleanTalkSpamError();
+//        }
 
         if ($this->validationService->isCleanTalkSpamUsingApi($this->formData, $this->form)) {
             $hasSpam = true;

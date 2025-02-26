@@ -28,26 +28,20 @@ class CleanTalkHandler
 
     public static function validate($accessKey)
     {
+        /*
+         * Let s validate the key via special API method instead of performing test check_message
+         */
         $cleanTalkRequest = [
-            'method_name' => 'check_newuser',
+            'method_name' => 'notice_paid_till',
             'auth_key' => $accessKey,
-            'sender_email' => wp_get_current_user()->user_email,
-            'sender_ip' => wpFluentForm()->request->getIp(),
-            'js_on' => 1,
-            'submit_time' => time(),
-            'sender_nickname' => wp_get_current_user()->user_login,
-            'sender_info' => [
-                'REFFERRER' => $_SERVER['HTTP_REFERER'],
-                'USER_AGENT' => htmlspecialchars(@$_SERVER['HTTP_USER_AGENT'])
-            ]
         ];
 
         $response = wp_remote_post(
-            'https://moderate.cleantalk.org/api2.0',
+            'https://api.cleantalk.org/', //important
             [
-                'body'    => \json_encode($cleanTalkRequest, true),
+                'body'    => \http_build_query($cleanTalkRequest, true),
                 'headers' => [
-                    'Content-Type' => 'application/json',
+                    'Content-Type' => 'application/x-www-form-urlencoded', //important
                 ],
             ]
         );
@@ -58,7 +52,7 @@ class CleanTalkHandler
 
         $response = json_decode(wp_remote_retrieve_body($response));
 
-        if ($response->allow == 1 && $response->inactive == 0 && $response->account_status == 1) {
+        if ($response->data->moderate == 1 && $response->data->valid == 1 && $response->data->product_id == 1) {
             return true;
         } else {
             return false;
@@ -82,10 +76,10 @@ class CleanTalkHandler
             'sender_ip'       => wpFluentForm()->request->getIp(),
             'event_token'     => $eventToken,
             'submit_time'     => $submitTime,
-            'sender_info'     => [
-                'REFERRER'   => urlencode($formData['_wp_http_referer']),
-                'USER_AGENT' => htmlspecialchars(@$_SERVER['SERVER_NAME'] . @$_SERVER['REQUEST_URI'])
-            ],
+            'sender_info'     => json_encode([ //needs to be json string
+                'REFFERRER'   => $_SERVER['HTTP_REFERER'], //please keep on this typo in REFFERRER word and do not urlencode it
+                'USER_AGENT' => htmlspecialchars(@$_SERVER['HTTP_USER_AGENT'])
+            ]),
             'js_on'           => 1,
             'sender_nickname' => '',
             'sender_email'    => '',
