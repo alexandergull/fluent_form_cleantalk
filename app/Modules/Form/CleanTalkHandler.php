@@ -82,7 +82,7 @@ class CleanTalkHandler
             'sender_email'    => '',
             'message'         => '',
             'phone'           => '',
-            'agent'           => 'wordpress',
+            'agent'           => 'wordpress-fluentforms-' . FLUENTFORM_VERSION,
             'post_info'       => [
                 'comment_type' => 'fluent_forms_vendor_integration__use_api'
             ],
