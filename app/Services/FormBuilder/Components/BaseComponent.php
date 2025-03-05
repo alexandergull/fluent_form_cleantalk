@@ -10,12 +10,12 @@ use stdClass;
 class BaseComponent
 {
     public $app;
-
+    
     public function __construct($key = '', $title = '', $tags = [], $position = 'advanced')
     {
         $this->app = wpFluentForm();
     }
-
+    
     /**
      * Build unique ID concatenating form id and name attribute
      *
@@ -32,18 +32,18 @@ class BaseComponent
             }
             $elementName = $data['attributes']['name'];
             $elementName = str_replace(['[', ']', ' '], '_', $elementName);
-
+            
             $suffix = esc_attr($form->id);
-            if($formInstance > 1) {
-                $suffix = $suffix.'_'.$formInstance;
+            if ($formInstance > 1) {
+                $suffix = $suffix . '_' . $formInstance;
             }
-
-            $suffix .= '_'.$elementName;
-
+            
+            $suffix .= '_' . $elementName;
+            
             return 'ff_' . esc_attr($suffix);
         }
     }
-
+    
     /**
      * Build attributes for any html element
      *
@@ -54,17 +54,17 @@ class BaseComponent
     protected function buildAttributes($attributes, $form = null)
     {
         $atts = '';
-
+        
         foreach ($attributes as $key => $value) {
             if ($value || 0 === $value || '0' === $value) {
                 $value = htmlspecialchars($value);
                 $atts .= esc_attr($key) . '="' . $value . '" ';
             }
         }
-
+        
         return $atts;
     }
-
+    
     /**
      * Extract value attribute from attribute list
      *
@@ -75,15 +75,15 @@ class BaseComponent
     protected function extractValueFromAttributes(&$element)
     {
         $value = '';
-
+        
         if (isset($element['attributes']['value'])) {
             $value = $element['attributes']['value'];
             unset($element['attributes']['value']);
         }
-
+        
         return $value;
     }
-
+    
     protected function extractDynamicValues($data, $form)
     {
         $defaultValues = [];
@@ -98,7 +98,7 @@ class BaseComponent
         }
         return $defaultValues;
     }
-
+    
     /**
      * Determine if the given element has conditions bound
      *
@@ -109,14 +109,28 @@ class BaseComponent
     protected function hasConditions($element)
     {
         $conditionals = ArrayHelper::get($element, 'settings.conditional_logics');
-
+        
         if (isset($conditionals['status']) && $conditionals['status']) {
-            return array_filter($conditionals['conditions'], function ($item) {
+            if (isset($conditionals['type']) && $conditionals['type'] === 'group') {
+                $groups = ArrayHelper::get($conditionals, 'condition_groups');
+                if (!is_array($groups)) {
+                    return false;
+                }
+    
+                $groups = array_filter($groups, function ($group) {
+                    $rules = ArrayHelper::get($group, 'rules', []);
+                    return !empty(array_filter($rules, fn($rule) => !empty($rule['field']) && !empty($rule['operator'])));
+                });
+                return !!$groups;
+            }
+
+            return !!array_filter($conditionals['conditions'], function ($item) {
                 return $item['field'] && $item['operator'];
             });
         }
+        return false;
     }
-
+    
     /**
      * Generate a unique id for an element
      *
@@ -128,17 +142,16 @@ class BaseComponent
     {
         return $str . '_' . md5(uniqid(mt_rand(), true));
     }
-
+    
     /**
      * Get a default class for each form element wrapper
-     *
      * @return string
      */
     protected function getDefaultContainerClass()
     {
         return 'ff-el-group ';
     }
-
+    
     /**
      * Get required class for form element wrapper
      *
@@ -152,24 +165,23 @@ class BaseComponent
             return $rules['required']['value'] ? 'ff-el-is-required ' : '';
         }
     }
-
+    
     /**
      * Get asterisk placement for the required form elements
-     *
      * @return string
      */
     protected function getAsteriskPlacement($form)
     {
         // for older version compatibility
         $asteriskPlacement = 'asterisk-right';
-
+        
         if (isset($form->settings['layout']['asteriskPlacement'])) {
             $asteriskPlacement = $form->settings['layout']['asteriskPlacement'];
         }
-
+        
         return $asteriskPlacement . ' ';
     }
-
+    
     /**
      * Generate a label for any element
      *
@@ -183,51 +195,51 @@ class BaseComponent
         if ('with_label' == $form->settings['layout']['helpMessagePlacement']) {
             $helpMessage = $this->getLabelHelpMessage($data);
         }
-
+        
         $id = isset($data['attributes']['id']) ? $data['attributes']['id'] : '';
         $label = isset($data['settings']['label']) ? $data['settings']['label'] : '';
         $requiredClass = $this->getRequiredClass(ArrayHelper::get($data, 'settings.validation_rules', []));
         $classes = trim('ff-el-input--label ' . $requiredClass . $this->getAsteriskPlacement($form));
-
+        
         return "<div class='" . esc_attr($classes) . "'><label aria-label='" . esc_attr($this->removeShortcode($label)) . "' for='" . esc_attr($id) . "'>" . fluentform_sanitize_html($label) . '</label>' . $helpMessage . '</div>';
     }
-
+    
     /**
      * Generate html/markup for any element
      *
-     * @param string    $elMarkup [Predifined partial markup]
-     * @param array     $data
-     * @param stdClass $form     [Form object]
+     * @param string $elMarkup [Predifined partial markup]
+     * @param array $data
+     * @param stdClass $form   [Form object]
      *
      * @return string [Compiled markup]
      */
     protected function buildElementMarkup($elMarkup, $data, $form)
     {
         $hasConditions = $this->hasConditions($data) ? 'has-conditions ' : '';
-
+        
         $labelPlacement = ArrayHelper::get($data, 'settings.label_placement');
-
+        
         $labelPlacementClass = $labelPlacement ? 'ff-el-form-' . $labelPlacement . ' ' : '';
-
+        
         $validationRules = ArrayHelper::get($data, 'settings.validation_rules');
-
+        
         $requiredClass = $this->getRequiredClass($validationRules);
-
+        
         $labelClass = trim(
             'ff-el-input--label ' .
             $requiredClass .
             $this->getAsteriskPlacement($form)
         );
-
+        
         $formGroupClass = trim(
             $this->getDefaultContainerClass() .
             $labelPlacementClass .
             $hasConditions .
             ArrayHelper::get($data, 'settings.container_class')
         );
-
+        
         $labelHelpText = $inputHelpText = '';
-
+        
         $labelPlacement = $form->settings['layout']['helpMessagePlacement'];
         if ('with_label' == $labelPlacement) {
             $labelHelpText = $this->getLabelHelpMessage($data);
@@ -238,12 +250,12 @@ class BaseComponent
         } else {
             $inputHelpText = $this->getInputHelpMessage($data);
         }
-
+        
         $forStr = '';
         if (isset($data['attributes']['id'])) {
             $forStr = "for='" . esc_attr($data['attributes']['id']) . "'";
         }
-
+        
         $labelMarkup = '';
         
         if (!empty($data['settings']['label'])) {
@@ -266,19 +278,19 @@ class BaseComponent
                 '<div class="%1$s"><label %2$s %3$s>%4$s</label>%5$s</div>',
                 esc_attr($labelClass),
                 $forStr,
-                $ariaLabel != '' ? 'aria-label="'.esc_attr($this->removeShortcode($label)).'"' : '',
+                $ariaLabel != '' ? 'aria-label="' . esc_attr($this->removeShortcode($label)) . '"' : '',
                 fluentform_sanitize_html($label),
                 fluentform_sanitize_html($labelHelpText)
             );
         }
-
+        
         $inputHelpText = fluentform_sanitize_html($inputHelpText);
-
+        
         if ('after_label' == $labelPlacement) {
             $elMarkup = $inputHelpText . $elMarkup;
             $inputHelpText = '';
         }
-
+        
         return sprintf(
             "<div class='%s'>%s<div class='ff-el-input--content'>%s%s</div></div>",
             esc_attr($formGroupClass),
@@ -287,7 +299,7 @@ class BaseComponent
             $inputHelpText
         );
     }
-
+    
     /**
      * Generate a help message for any element beside label
      *
@@ -303,7 +315,7 @@ class BaseComponent
             return sprintf('<div class="ff-el-tooltip" data-content="%s">%s</div>', $text, $icon);
         }
     }
-
+    
     /**
      * Generate a help message for any element beside form element
      *
@@ -314,23 +326,24 @@ class BaseComponent
     protected function getInputHelpMessage($data, $hideClass = '')
     {
         $class = trim('ff-el-help-message ' . $hideClass);
-
-        if (isset($data['settings']['help_message']) && ! empty($data['settings']['help_message'])) {
+        
+        if (isset($data['settings']['help_message']) && !empty($data['settings']['help_message'])) {
             return "<div class='" . esc_attr($class) . "'>" . fluentform_sanitize_html($data['settings']['help_message']) . '</div>';
         }
         return false;
     }
-
+    
     protected function parseEditorSmartCode($text, $form)
     {
         return (new Component($this->app))->replaceEditorSmartCodes($text, $form);
     }
-
+    
     protected function printContent($hook, $html, $data, $form)
     {
-        echo apply_filters($hook, $html, $data, $form); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $html is escaped before being passed in.
+        echo apply_filters($hook, $html, $data,
+            $form); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $html is escaped before being passed in.
     }
-
+    
     /**
      * A helper method for remove shortcode from aria label
      *
@@ -342,7 +355,7 @@ class BaseComponent
     {
         // Find all occurrences of text enclosed in curly braces.
         preg_match_all('/{(.*?)}/', $label, $matches);
-    
+        
         // If there are matches, remove them from the label.
         if ($matches[0]) {
             $label = trim(str_replace($matches[0], '', $label));

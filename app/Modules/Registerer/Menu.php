@@ -979,7 +979,7 @@ class Menu
             'element_search_tags'            => $searchTags,
             'element_settings_placement'     => $elementPlacements,
             'all_forms_url'                  => admin_url('admin.php?page=fluent_forms'),
-            'has_payment_features'           => !defined('FLUENTFORMPRO'),
+            'has_payment_features'           => true,
             'upgrade_url'                    => fluentform_upgrade_url(),
             'is_conversion_form'             => Helper::isConversionForm($formId),
             'is_autoload_captcha'            => Helper::isAutoloadCaptchaEnabled(),
@@ -1062,7 +1062,6 @@ class Menu
         );
         
         $components = apply_filters('fluentform/global_settings_components', $components);
-    
 
         $components['reCAPTCHA'] = [
             'hash'  => 're_captcha',

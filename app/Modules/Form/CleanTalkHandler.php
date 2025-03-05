@@ -25,23 +25,20 @@ class CleanTalkHandler
             echo '<input type="hidden" name="ff_ct_form_load_time" class="ff_ct_form_load_time" value="">';
         }
     }
-
+    
     public static function validate($accessKey)
     {
-        /*
-         * Let s validate the key via special API method instead of performing test check_message
-         */
         $cleanTalkRequest = [
             'method_name' => 'notice_paid_till',
             'auth_key' => $accessKey,
         ];
 
         $response = wp_remote_post(
-            'https://api.cleantalk.org/', //important
+            'https://api.cleantalk.org/',
             [
                 'body'    => \http_build_query($cleanTalkRequest, true),
                 'headers' => [
-                    'Content-Type' => 'application/x-www-form-urlencoded', //important
+                    'Content-Type' => 'application/x-www-form-urlencoded',
                 ],
             ]
         );
@@ -76,8 +73,8 @@ class CleanTalkHandler
             'sender_ip'       => wpFluentForm()->request->getIp(),
             'event_token'     => $eventToken,
             'submit_time'     => $submitTime,
-            'sender_info'     => json_encode([ //needs to be json string
-                'REFFERRER'   => $_SERVER['HTTP_REFERER'], //please keep on this typo in REFFERRER word and do not urlencode it
+            'sender_info'     => json_encode([
+                'REFERRER'   => $_SERVER['HTTP_REFERER'],
                 'USER_AGENT' => htmlspecialchars(@$_SERVER['HTTP_USER_AGENT'])
             ]),
             'js_on'           => 1,
@@ -98,7 +95,7 @@ class CleanTalkHandler
             'textarea'    => 'message',
             'phone'       => 'phone',
         ];
-
+        
         $inputs = FormFieldsParser::getInputs($form, ['attributes']);
 
         foreach ($inputs as $input) {
@@ -117,8 +114,6 @@ class CleanTalkHandler
 
         $cleanTalkRequest = apply_filters('fluentform/cleantalk_fields', $cleanTalkRequest, $formData, $form);
 
-        error_log('CTDEBUG: [' . __FUNCTION__ . '] [$cleanTalkRequest]: ' . var_export($cleanTalkRequest,true));
-
         $response = wp_remote_post(
             'https://moderate.cleantalk.org/api2.0',
             [
@@ -135,8 +130,6 @@ class CleanTalkHandler
 
         $response = json_decode(wp_remote_retrieve_body($response));
 
-        error_log('CTDEBUG: [' . __FUNCTION__ . '] [$response]: ' . var_export($response,true));
-
         if ($response->allow == 1 && $response->spam == 0 && $response->account_status == 1) {
             return false;
         } else {
@@ -149,7 +142,7 @@ class CleanTalkHandler
         $settings = get_option('_fluentform_cleantalk_details');
         return $settings && ArrayHelper::get($settings, 'status');
     }
-
+    
     public static function isEnabled()
     {
         if (!self::isPluginEnabled()) {
@@ -185,7 +178,7 @@ class CleanTalkHandler
         global $apbct;
         $app = wpFluentForm();
         $ip = $app->request->getIp();
-
+        
         $info = [
             'auth_key'             => $apbct->settings['apikey'],
             'sender_ip'            => $ip,

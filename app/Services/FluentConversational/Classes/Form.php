@@ -4,7 +4,8 @@ namespace FluentForm\App\Services\FluentConversational\Classes;
 
 use FluentForm\App\Helpers\Helper;
 use FluentForm\App\Modules\Acl\Acl;
-use FluentForm\App\Modules\Form\FormFieldsParser;
+use FluentForm\App\Modules\Payments\PaymentHelper;
+use FluentForm\App\Modules\Payments\PaymentMethods\Stripe\StripeSettings;
 use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\App\Modules\Form\Settings\FormCssJs;
 use FluentForm\App\Services\FluentConversational\Classes\Converter\Converter;
@@ -824,8 +825,8 @@ class Form
     {
         $paymentConfig = null;
 
-        if ($form->has_payment && defined('FLUENTFORMPRO')) {
-            $publishableKeyStripe = \FluentFormPro\Payments\PaymentMethods\Stripe\StripeSettings::getPublishableKey($form->id);
+        if ($form->has_payment) {
+            $publishableKeyStripe = StripeSettings::getPublishableKey($form->id);
             $publishableKeyStripe = apply_filters_deprecated(
                 'fluentform-payment_stripe_publishable_key',
                 [
@@ -844,10 +845,10 @@ class Form
             );
 
             $paymentConfig = [
-                'currency_settings' => \FluentFormPro\Payments\PaymentHelper::getCurrencyConfig($form->id),
+                'currency_settings' => PaymentHelper::getCurrencyConfig($form->id),
                 'stripe'            => [
                     'publishable_key' => $publishableKey,
-                    'inlineConfig'    => \FluentFormPro\Payments\PaymentHelper::getStripeInlineConfig($form->id),
+                    'inlineConfig'    => PaymentHelper::getStripeInlineConfig($form->id),
                 ],
                 'stripe_app_info'   => [
                     'name'       => 'Fluent Forms',
@@ -912,6 +913,7 @@ class Form
             'has_per_step_save'         => ArrayHelper::get($form->settings, 'conv_form_per_step_save', false),
             'has_resume_from_last_step' => ArrayHelper::get($form->settings, 'conv_form_resume_from_last_step', false),
             'has_save_link'             => $form->save_state?? false,
+            'has_save_and_resume_button'=> $form->hasSaveAndRusemeButton ?? false,
             'step_completed'            => $form->stepCompleted ?? 0
         ];
     }

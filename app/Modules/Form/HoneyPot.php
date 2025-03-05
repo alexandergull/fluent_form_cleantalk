@@ -25,7 +25,10 @@ class HoneyPot
         $labels = ['Newsletter', 'Updates', 'Contact', 'Subscribe', 'Notify'];
         $randomLabel = $labels[array_rand($labels)];
         ?>
-        <div class="ff-el-group ff-hpsf-container">
+        <div
+                style="display: none!important; position: absolute!important; transform: translateX(1000%)!important;"
+                class="ff-el-group ff-hpsf-container"
+        >
             <div class="ff-el-input--label asterisk-right">
                 <label for="<?php echo esc_attr($fieldId); ?>" aria-label="<?php echo esc_attr($randomLabel); ?>">
                     <?php echo esc_html($randomLabel); ?>

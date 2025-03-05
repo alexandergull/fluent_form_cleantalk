@@ -5,15 +5,16 @@ use FluentForm\App\Hooks\Handlers\ActivationHandler;
 use FluentForm\App\Hooks\Handlers\DeactivationHandler;
 use FluentForm\App\Services\Migrator\Bootstrap as FormsMigrator;
 use FluentForm\App\Services\FluentConversational\Classes\Form as FluentConversational;
+use FluentForm\App\Helpers\Helper;
 
 return function ($file) {
     add_action('plugins_loaded', function () {
         $isNotCompatible = defined('FLUENTFORMPRO') && version_compare(FLUENTFORMPRO_VERSION, '5.0.0', '<');
+        $message = '<div><h3>' . __('Fluent Forms Pro is not working. Update required!',
+                'fluentform') . '</h3><p>' . __('Current version of the pro plugin is not compatible with the latest version of Core Plugin.',
+                'fluentform') . '<a href="' . admin_url('plugins.php?s=fluentformpro&plugin_status=all&force-check=1') . '">' . __('Please update Fluent Forms Pro to latest version.',
+                'fluentform') . '</a></p></div>';
         if ($isNotCompatible) {
-            $message = '<div><h3>' . __('Fluent Forms Pro is not working. Update required!',
-                    'fluentform') . '</h3><p>' . __('Current version of the pro plugin is not compatible with the latest version of Core Plugin.',
-                    'fluentform') . '<a href="' . admin_url('plugins.php?s=fluentformpro&plugin_status=all&force-check=1') . '">' . __('Please update Fluent Forms Pro to latest version.',
-                    'fluentform') . '</a></p></div>';
             $actions = [
                 'fluentform/global_menu',
                 'fluentform/after_form_menu',
@@ -46,6 +47,9 @@ return function ($file) {
     });
 
     add_action('plugins_loaded', function () use ($app) {
+        if (Helper::isPaymentCompatible()) {
+            (new FluentForm\App\Modules\Payments\PaymentHandler())->init();
+        }
         do_action_deprecated(
             'fluentform_loaded',
             [
@@ -65,7 +69,6 @@ return function ($file) {
             'fluentform/loaded',
             'Use fluentform/loaded instead of fluentform-loaded.'
         );
-
         do_action('fluentform/loaded', $app);
     });
 

@@ -3,6 +3,7 @@
 namespace FluentForm\App\Services\Form;
 
 use Exception;
+use FluentForm\App\Helpers\Helper;
 use FluentForm\App\Models\Form;
 use FluentForm\App\Models\FormMeta;
 use FluentForm\Framework\Foundation\App;
@@ -374,7 +375,7 @@ class FormService
             ],
         ];
         
-        if (!defined('FLUENTFORMPRO')) {
+        if (!Helper::hasPro()) {
             $disabled['ratings'] = [
                 'disabled'    => true,
                 'title'       => __('Ratings', 'fluentform'),
@@ -471,24 +472,6 @@ class FormService
                 'image'       => fluentformMix('img/pro-fields/color-picker.png'),
                 'video'       => '',
             ];
-            $disabled['multi_payment_component'] = [
-                'disabled'    => true,
-                'is_payment'  => true,
-                'title'       => __('Payment Field', 'fluentform'),
-                'description' => __('Payment Field is not available with the free version. Please upgrade to pro to get all the advanced features.',
-                    'fluentform'),
-                'image'       => fluentformMix('img/pro-fields/payment-field.png'),
-                'video'       => '',
-            ];
-            $disabled['custom_payment_component'] = [
-                'disabled'    => true,
-                'is_payment'  => true,
-                'title'       => 'Custom Payment Amount',
-                'description' => __('Custom Payment Amount is not available with the free version. Please upgrade to pro to get all the advanced features.',
-                    'fluentform'),
-                'image'       => fluentformMix('img/pro-fields/custom-payment-amount.png'),
-                'video'       => '',
-            ];
             $disabled['subscription_payment_component'] = [
                 'disabled'    => true,
                 'is_payment'  => true,
@@ -496,33 +479,6 @@ class FormService
                 'description' => __('Subscription Field is not available with the free version. Please upgrade to pro to get all the advanced features.',
                     'fluentform'),
                 'image'       => fluentformMix('img/pro-fields/subscription-field.png'),
-                'video'       => '',
-            ];
-            $disabled['item_quantity_component'] = [
-                'disabled'    => true,
-                'is_payment'  => true,
-                'title'       => __('Item Quantity', 'fluentform'),
-                'description' => __('Item Quantity is not available with the free version. Please upgrade to pro to get all the advanced features.',
-                    'fluentform'),
-                'image'       => fluentformMix('img/pro-fields/item-quantity.png'),
-                'video'       => '',
-            ];
-            $disabled['payment_method'] = [
-                'disabled'    => true,
-                'is_payment'  => true,
-                'title'       => __('Payment Method', 'fluentform'),
-                'description' => __('Payment Method is not available with the free version. Please upgrade to pro to get all the advanced features.',
-                    'fluentform'),
-                'image'       => fluentformMix('img/pro-fields/payment-method.png'),
-                'video'       => '',
-            ];
-            $disabled['payment_summary_component'] = [
-                'disabled'    => true,
-                'is_payment'  => true,
-                'title'       => __('Payment Summary', 'fluentform'),
-                'description' => __('Payment Summary is not available with the free version. Please upgrade to pro to get all the advanced features.',
-                    'fluentform'),
-                'image'       => fluentformMix('img/pro-fields/payment-summary.png'),
                 'video'       => '',
             ];
             $disabled['payment_coupon'] = [

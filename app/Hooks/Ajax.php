@@ -320,39 +320,11 @@ $app->addAction('wp_ajax_fluentform_delete_api_logs_by_ids', function () use ($a
     (new \FluentForm\App\Modules\Logger\DataLogger($app))->deleteApiLogsByIds();
 });
 
-$app->addAction('wp_ajax_fluentform-reset-analytics', function () use ($app) {
-    dd('wp_ajax_fluentform-reset-analytics');
-    Acl::verify('fluentform_manage_entries');
-    (new \FluentForm\App\Modules\Form\Analytics($app))->resetFormAnalytics();
-});
-
 $app->addAction('wp_ajax_fluentform-change-entry-status', function () {
     Acl::verify('fluentform_manage_entries');
     (new \FluentForm\App\Modules\Entries\Entries())->changeEntryStatus();
 });
 
-$app->addAction(
-    'wp_ajax_fluentform-get-pages',
-    function () {
-        dd('wp_ajax_fluentform-get-pages');
-        Acl::verify('fluentform_forms_manager');
-
-        $pages = get_pages();
-        $formattedPages = [];
-
-        foreach ($pages as $index => $page) {
-            $formattedPages[] = [
-                'ID'         => $page->ID,
-                'post_title' => $page->post_title,
-                'guid'       => $page->guid,
-            ];
-        }
-
-        wp_send_json_success([
-            'pages' => $formattedPages,
-        ], 200);
-    }
-);
 
 $app->addAction('wp_ajax_fluentform_notice_action_track_yes', function () {
     Acl::hasAnyFormPermission();

@@ -190,8 +190,7 @@ class GlobalNotificationManager
         $conditionSettings = ArrayHelper::get($parsedValue, 'conditionals');
         if (
             ! $conditionSettings ||
-            ! ArrayHelper::isTrue($conditionSettings, 'status') ||
-            ! count(ArrayHelper::get($conditionSettings, 'conditions'))
+            ! ArrayHelper::isTrue($conditionSettings, 'status')
         ) {
             return true;
         }

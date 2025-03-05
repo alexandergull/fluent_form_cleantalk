@@ -139,41 +139,19 @@ class Request
      */
     public function getIp()
     {
+        // Prioritize REMOTE_ADDR as WordFence Suggestion
         $ip = $this->server('REMOTE_ADDR');
 
-        $headers = [
-            'HTTP_CLIENT_IP',
-            'HTTP_X_FORWARDED_FOR'
-        ];
-
-        foreach ($headers as $header) {
-            if ($this->server($header)) {
-                $headerIps = array_map('trim', explode(',', $this->server($header)));
-                foreach ($headerIps as $headerIp) {
-                    if ($this->isValidIp($headerIp)) {
-                        $ip = $headerIp;
-                        break 2;
-                    }
-                }
-            }
+        if (empty($ip) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $this->server('HTTP_X_FORWARDED_FOR');
         }
 
-        return $this->isValidIp($ip) ? $ip : '0.0.0.0';
-    }
-
-    private function isValidIp($ip)
-    {
-        if (defined('WP_DEBUG')) {
-            // In debug mode, allow private IPs (including localhost)
-            return filter_var($ip, FILTER_VALIDATE_IP) !== false;
-        } else {
-            // In production, only allow public IPs
-            return filter_var(
-                $ip, 
-                FILTER_VALIDATE_IP, 
-                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-            ) !== false;
+        if (empty($ip) && !empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $this->server('HTTP_CLIENT_IP');
         }
+
+        // If no valid IP is found, return '0.0.0.0'
+        return !empty($ip) ? $ip : '0.0.0.0';
     }
 
     public function server($key = null, $default = null)

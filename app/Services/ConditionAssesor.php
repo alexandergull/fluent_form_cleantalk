@@ -11,32 +11,55 @@ class ConditionAssesor
     public static function evaluate(&$field, &$inputs)
     {
         $status = Arr::get($field, 'conditionals.status');
+        if (!$status) {
+            return true;
+        }
 
+        $type = Arr::get($field, 'conditionals.type', 'any');
 
-        $conditionals =  $status ? Arr::get($field, 'conditionals.conditions') : false;
+        // Handle group conditions
+        if ($type === 'group' && $conditionGroups = Arr::get($field, 'conditionals.condition_groups')) {
+            return self::evaluateGroupConditions($conditionGroups, $inputs);
+        }
 
+        // Handle 'any', 'all' conditions
+        if ($type !== 'group' && $conditions = Arr::get($field, 'conditionals.conditions')) {
+            return self::evaluateConditions($conditions, $inputs, $type);
+        }
+        return true;
+    }
 
-        $hasConditionMet = true;
-
-        if ($conditionals) {
-            $toMatch = Arr::get($field, 'conditionals.type');
-
-
-            foreach ($conditionals as $conditional) {
-
-                if (!Arr::get($conditional, 'field')) {
-                    continue;
-                }
-
-                $hasConditionMet = static::assess($conditional, $inputs);
-
-                if ($hasConditionMet && $toMatch == 'any') {
+    private static function evaluateGroupConditions($conditionGroups, &$inputs)
+    {
+        $hasGroupConditionsMet = true;
+        foreach ($conditionGroups as $group) {
+            if ($conditions = Arr::get($group, 'rules')) {
+                $hasGroupConditionsMet = self::evaluateConditions($conditions, $inputs, 'all');
+                if ($hasGroupConditionsMet) {
                     return true;
                 }
+            }
+        }
+        return $hasGroupConditionsMet;
+    }
 
-                if ($toMatch === 'all' && !$hasConditionMet) {
-                    return false;
-                }
+    private static function evaluateConditions($conditions, &$inputs, $type)
+    {
+        $hasConditionMet = true;
+
+        foreach ($conditions as $condition) {
+            if (!Arr::get($condition, 'field') || !Arr::get($condition, 'operator')) {
+                continue;
+            }
+
+            $hasConditionMet = static::assess($condition, $inputs);
+
+            if ($hasConditionMet && $type == 'any') {
+                return true;
+            }
+
+            if ($type === 'all' && !$hasConditionMet) {
+                return false;
             }
         }
 
