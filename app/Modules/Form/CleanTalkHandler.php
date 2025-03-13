@@ -25,7 +25,7 @@ class CleanTalkHandler
             echo '<input type="hidden" name="ff_ct_form_load_time" class="ff_ct_form_load_time" value="">';
         }
     }
-    
+
     public static function validate($accessKey)
     {
         $cleanTalkRequest = [
@@ -58,6 +58,8 @@ class CleanTalkHandler
 
     public static function spamSubmissionCheckWithApi($formData, $form)
     {
+        global $cleantalk_executed;
+
         $accessKey = ArrayHelper::get(get_option('_fluentform_cleantalk_details'), 'accessKey');
 
         if (!$accessKey) {
@@ -84,7 +86,8 @@ class CleanTalkHandler
             'phone'           => '',
             'agent'           => 'wordpress-fluentforms-' . FLUENTFORM_VERSION,
             'post_info'       => [
-                'comment_type' => 'fluent_forms_vendor_integration__use_api'
+                'comment_type' => 'fluent_forms_vendor_integration__use_api',
+                'post_url' => $_SERVER['HTTP_REFERER']
             ],
             'all_headers'   => strtolower(json_encode(wpFluentForm()->request->header())),
         ];
@@ -95,7 +98,7 @@ class CleanTalkHandler
             'textarea'    => 'message',
             'phone'       => 'phone',
         ];
-        
+
         $inputs = FormFieldsParser::getInputs($form, ['attributes']);
 
         foreach ($inputs as $input) {
@@ -130,11 +133,11 @@ class CleanTalkHandler
 
         $response = json_decode(wp_remote_retrieve_body($response));
 
-        if ($response->allow == 1 && $response->spam == 0 && $response->account_status == 1) {
-            return false;
-        } else {
-            return true;
-        }
+        $cleantalk_passed = $response->allow == 1 && $response->spam == 0 && $response->account_status == 1;
+
+        $cleantalk_executed = true;
+
+        return !$cleantalk_passed;
     }
 
     public static function isCleantalkActivated()
@@ -142,7 +145,7 @@ class CleanTalkHandler
         $settings = get_option('_fluentform_cleantalk_details');
         return $settings && ArrayHelper::get($settings, 'status');
     }
-    
+
     public static function isEnabled()
     {
         if (!self::isPluginEnabled()) {
@@ -178,7 +181,7 @@ class CleanTalkHandler
         global $apbct;
         $app = wpFluentForm();
         $ip = $app->request->getIp();
-        
+
         $info = [
             'auth_key'             => $apbct->settings['apikey'],
             'sender_ip'            => $ip,
